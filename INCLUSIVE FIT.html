@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inclusive Fit - App Prototipo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente más moderna y formal */
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa; /* Gris muy claro para fondo formal */
+            color: #212529; /* Gris oscuro para texto */
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+            font-size: 16px; /* Base para móviles */
+            -webkit-touch-callout: none; /* Evita menús contextuales en iOS */
+            -webkit-user-select: none; /* Evita selección accidental */
+            user-select: none;
+        }
+        .high-contrast {
+            background-color: #000;
+            color: #fff;
+        }
+        header {
+            background-color: #343a40; /* Gris oscuro formal */
+            color: white;
+            padding: 15px; /* Reducido para móviles */
+            text-align: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            font-size: 18px; /* Ajustado */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Sombra sutil para profundidad */
+        }
+        nav {
+            margin-top: 70px; /* Ajustado para header más pequeño */
+            background-color: #e9ecef; /* Mantener gris claro, pero podría ajustarse */
+            padding: 10px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            overflow-x: auto; /* Scroll horizontal si es necesario */
+            border-bottom: 1px solid #dee2e6; /* Línea sutil */
+        }
+        nav button {
+            background: none;
+            border: none;
+            padding: 12px 15px; /* Más grande para touch */
+            cursor: pointer;
+            font-size: 16px;
+            color: #495057; /* Gris oscuro para botones */
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+            min-width: 80px; /* Evita botones demasiado pequeños */
+            touch-action: manipulation; /* Mejora touch en móviles */
+        }
+        nav button:hover, nav button:focus {
+            background-color: #495057; /* Gris más oscuro al hover */
+            color: white;
+        }
+        .screen {
+            display: none;
+            padding: 20px; /* Aumentado ligeramente para mejor legibilidad */
+            margin: 15px auto;
+            max-width: 100%; /* Ocupa todo el ancho en móviles */
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .screen.active {
+            display: block;
+        }
+        .exercise {
+            border: 1px solid #dee2e6; /* Gris sutil */
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background-color: #f8f9fa; /* Fondo gris claro para destacar */
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e9ecef; /* Gris claro */
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #28a745; /* Mantener verde para progreso */
+            width: 0%;
+            transition: width 0.5s;
+        }
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #ffc107; /* Amarillo para badges, podría cambiarse a algo más formal como azul */
+            color: #000;
+            border-radius: 20px;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .community-post {
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+        button, input, select, textarea {
+            padding: 12px; /* Más grande para touch */
+            margin: 5px 0;
+            border: 1px solid #ced4da; /* Gris sutil */
+            border-radius: 5px;
+            font-size: 16px; /* Mínimo para accesibilidad */
+            width: 100%; /* Ocupa todo el ancho en móviles */
+            box-sizing: border-box;
+            background-color: white;
+            color: #495057;
+            touch-action: manipulation; /* Mejora touch */
+        }
+        button {
+            background-color: #495057; /* Gris oscuro para botones */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #343a40; /* Más oscuro al hover */
+        }
+        .voice-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #28a745; /* Verde para voz, mantener */
+            color: white;
+            padding: 20px; /* Más grande para touch */
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px; /* Más visible */
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Sombra */
+            touch-action: manipulation;
+            z-index: 101; /* Asegura que esté encima */
+        }
+        .voice-control:hover {
+            background-color: #218838;
+        }
+        /* Accesibilidad: Navegación por teclado */
+        button:focus, input:focus, select:focus, textarea:focus {
+            outline: 2px solid #495057; /* Gris oscuro para foco */
+        }
+        /* Alto contraste toggle */
+        #contrast-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 8px;
+            font-size: 14px;
+            background-color: #495057;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            touch-action: manipulation;
+        }
+
+        /* Media Queries para móviles */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px; /* Fuente más pequeña para pantallas pequeñas */
+            }
+            header {
+                padding: 10px;
+                font-size: 16px;
+            }
+            nav {
+                margin-top: 60px;
+                padding: 5px;
+                flex-direction: column; /* Apila botones verticalmente si es necesario */
+                align-items: center;
+            }
+            nav button {
+                width: 100%; /* Botones full-width */
+                margin: 5px 0;
+            }
+            .screen {
+                padding: 10px;
+                margin: 10px;
+            }
+            .exercise, .community-post {
+                padding: 10px;
+            }
+            .voice-control {
+                bottom: 10px;
+                right: 10px;
+                width: 50px;
+                height: 50px;
+                padding: 15px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Inclusive Fit</h1>
+        <p>Tu compañero para ejercicio inclusivo y motivador</p>
+        <button id="contrast-toggle">Alto Contraste</button>
+    </header>
+
+    <nav>
+        <button data-screen="home">Inicio</button>
+        <button data-screen="profile">Perfil</button>
+        <button data-screen="routines">Rutinas</button>
+        <button data-screen="gamification">Gamificación</button>
+        <button data-screen="community">Comunidad</button>
+        <button data-screen="settings">Ajustes</button>
+    </nav>
+
+    <!-- Pantalla de Inicio -->
+    <div id="home" class="screen active">
+        <h2>Bienvenido a Inclusive Fit</h2>
+        <p>Facilitamos rutinas de ejercicio personalizadas para personas con discapacidades motrices. ¡Empieza hoy!</p>
+        <p>Recuerda: Las rutinas están basadas en evidencia científica y adaptadas a tu nivel de movilidad.</p>
+        <button data-screen="routines">Ver Rutinas</button>
+    </div>
+
+    <!-- Perfil de Usuario -->
+    <div id="profile" class="screen">
+        <h2>Tu Perfil</h2>
+        <form id="profile-form">
+            <label for="name">Nombre:</label>
+            <input type="text" id="name" placeholder="Ingresa tu nombre">
+            <label for="age">Edad:</label>
+            <input type="number" id="age" placeholder="Edad">
+            <label for="disability">Tipo de Discapacidad:</label>
+            <select id="disability">
+                <option value="paralisis">Parálisis Cerebral</option>
+                <option value="esclerosis">Esclerosis Múltiple</option>
+                <option value="lesion">Lesión Medular</option>
+                <option value="otro">Otro</option>
+            </select>
+            <label for="mobility">Nivel de Movilidad (1-10):</label>
+            <input type="range" id="mobility" min="1" max="10" value="5">
+            <button type="submit">Guardar Perfil</button>
+        </form>
+        <p>Tu progreso: <span id="user-progress">0%</span></p>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+    </div>
+
+    <!-- Rutinas de Ejercicio -->
+    <div id="routines" class="screen">
+        <h2>Rutinas Personalizadas</h2>
+        <p>Basadas en tu perfil, aquí tienes ejercicios de bajo impacto.</p>
+        <div class="exercise">
+            <h3>Ejercicio 1: Estiramientos Suaves</h3>
+            <p>Descripción: Estira los brazos y piernas lentamente. Repite 5 veces.</p>
+            <button data-exercise="1">Completar</button>
+        </div>
+        <div class="exercise">
+            <h3>Ejercicio 2: Fortalecimiento de Brazos</h3>
+            <p>Descripción: Usa pesas ligeras o resistencia. 10 repeticiones.</p>
+            <button data-exercise="2">Completar</button>
+        </div>
+        <div class="exercise">
+            <h3>Ejercicio 3: Equilibrio Sentado</h3>
+            <p>Descripción: Mantén la postura erguida. 2 minutos.</p>
+            <button data-exercise="3">Completar</button>
+        </div>
+        <p>Progresión: Aumenta la duración gradualmente para evitar sobrecargas.</p>
+    </div>
+
+    <!-- Gamificación -->
+    <div id="gamification" class="screen">
+        <h2>Gamificación y Motivación</h2>
+        <p>¡Gana puntos y badges por completar rutinas!</p>
+        <p>Puntos acumulados: <span id="points">0</span></p>
+        <div id="badges">
+            <!-- Badges se agregan dinámicamente -->
+        </div>
+        <button id="claim-reward">Reclamar Recompensa Diaria</button>
+        <p>Recordatorios: ¡No olvides ejercitarte hoy!</p>
+    </div>
+
+    <!-- Comunidad -->
+    <div id="community" class="screen">
+        <h2>Comunidad de Apoyo</h2>
+        <p>Comparte experiencias y recibe consejos.</p>
+        <div class="community-post">
+            <p><strong>Usuario1:</strong> ¡Hoy completé mi rutina! Me siento genial.</p>
+        </div>
+        <div class="community-post">
+            <p><strong>Usuario2:</strong> ¿Algún tip para ejercicios de brazos?</p>
+        </div>
+        <textarea id="community-message" placeholder="Escribe tu mensaje..."></textarea>
+        <button id="post-message">Publicar</button>
+        <p>Conecta con entrenadores certificados en línea.</p>
+    </div>
+
+    <!-- Ajustes -->
+    <div id="settings" class="screen">
+        <h2>Ajustes de Accesibilidad</h2>
+        <p>Personaliza tu experiencia (WCAG 2.1).</p>
+        <label><input type="checkbox" id="voice-nav"> Navegación por Voz</label><br>
+        <label><input type="checkbox" id="screen-reader"> Compatibilidad con Lectores de Pantalla</label><br>
+        <label><input type="checkbox" id="gestures"> Controles Gestuales</label><br>
+        <label for="font-size">Tamaño de Fuente:</label>
+        <select id="font-size">
+            <option value="small">Pequeño</option>
+            <option value="medium" selected>Mediano</option>
+            <option value="large">Grande</option>
+        </select>
+        <button id="apply-settings">Aplicar Ajustes</button>
+    </div>
+
+    <!-- Control por Voz (Simulado) -->
+    <div class="voice-control" id="voice-control">🎤 Voz</div>
+
+    <script>
+        let points = 0;
+        let progress = 0;
+        let badges = [];
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function completeExercise(exerciseId) {
+            points += 10;
+            progress += 10;
+            document.getElementById('points').textContent = points;
+            document.getElementById('user-progress').textContent = progress + '%';
+            document.getElementById('progress-fill').style.width = progress + '%';
+            if (progress >= 50 && !badges.includes('Primer Paso')) {
+                badges.push('Primer Paso');
+                updateBadges();
+            }
+            alert('¡Ejercicio completado! +10 puntos.');
+        }
+
+        function claimReward() {
+            points += 5;
+            document.getElementById('points').textContent = points;
+            alert('¡Recompensa diaria reclamada! +5 puntos.');
+        }
+
+        function updateBadges() {
+            const badgesDiv = document.getElementById('badges');
+            badgesDiv.innerHTML = badges.map(badge => `<span class="badge">${badge}</span>`).join('');
+        }
+
+        function applySettings() {
+            const fontSize = document.getElementById('font-size').value;
+            document.body.style.fontSize = fontSize === 'small' ? '14px' : fontSize === 'large' ? '20px' : '16px';
+            alert('Ajustes aplicados.');
+        }
+
+        function voiceCommand() {
+            alert('Comando de voz activado. Di "Ir a rutinas" o similar. (Simulado)');
+        }
+
+        // Event listeners para navegación
+        document.querySelectorAll('nav button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const screenId = this.getAttribute('data-screen');
+                showScreen(screenId);
+            });
+        });
+
+        // Event listeners para botones en pantallas
+        document.querySelectorAll('button[data-screen]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const screenId = this.getAttribute('data-screen');
+                showScreen(screenId);
+            });
+        });
+
+        document.querySelectorAll('button[data-exercise]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const exerciseId = this.getAttribute('data-exercise');
+                completeExercise(exerciseId);
+            });
+        });
+
+        document.getElementById('claim-reward').addEventListener('click', claimReward);
+        document.getElementById('apply-settings').addEventListener('click', applySettings);
+        document.getElementById('voice-control').addEventListener('click', voiceCommand);
+        document.getElementById('contrast-toggle').addEventListener('click', function() {
+            document.body.classList.toggle('high-contrast');
+        });
+
+        // Formulario de perfil
+        document.getElementById('profile-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Perfil guardado.');
+        });
+
+        // Comunidad (simulado)
+        document.getElementById('post-message').addEventListener('click', function() {
+            const message = document.getElementById('community-message').value;
+            if (message.trim()) {
+                alert('Mensaje publicado: ' + message);
+                document.getElementById('community-message').value = '';
+            }
+        });
+
+        // Simulación de recordatorios (cambiado a notificación menos intrusiva)
+        setTimeout(() => {
+            if (window.confirm) { // Solo si confirm está disponible
+                if (confirm('¡Recordatorio! ¿Quieres hacer tu rutina diaria?')) {
+                    showScreen('routines');
+                }
+            } else {
+                alert('¡Recordatorio! Revisa tus rutinas diarias.');
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
